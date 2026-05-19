@@ -1,0 +1,175 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>🇮🇳 Nifty 50 AI Dashboard</title>
+  <link rel="stylesheet" href="/static/style.css" />
+  <script src="https://cdn.plot.ly/plotly-2.30.0.min.js"></script>
+</head>
+<body>
+
+<!-- ── TOP BAR ──────────────────────────────────────────────── -->
+<header id="topbar">
+  <div id="topbar-left">
+    <div>
+      <span class="flag">🇮🇳</span>
+      <h1>Nifty 50 AI Dashboard</h1>
+    </div>
+    <div class="subtitle">Real-time · LSTM + Attention · Ensemble ML · 80%+ Accuracy</div>
+  </div>
+
+  <div id="topbar-right">
+    <select id="symbol-dd"></select>
+    <select id="period-dd">
+      <option value="1mo">1 Month</option>
+      <option value="3mo">3 Months</option>
+      <option value="6mo">6 Months</option>
+      <option value="1y" selected>1 Year</option>
+      <option value="2y">2 Years</option>
+    </select>
+    <button class="btn btn-primary" id="refresh-btn">🔄 Refresh</button>
+    <button class="btn btn-success" id="train-btn">🤖 Run ML</button>
+  </div>
+</header>
+
+<!-- ── MAIN ─────────────────────────────────────────────────── -->
+<div id="main">
+
+  <!-- KPI CARDS -->
+  <div id="kpi-row">
+    <div class="kpi-card">
+      <div class="label">Price</div>
+      <div class="value" id="kpi-price" style="color:var(--accent)">—</div>
+      <div class="sub"   id="kpi-name">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Change</div>
+      <div class="value" id="kpi-change" style="color:var(--green)">—</div>
+      <div class="sub"   id="kpi-pct">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">52W High</div>
+      <div class="value" id="kpi-high" style="color:var(--yellow)">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">52W Low</div>
+      <div class="value" id="kpi-low" style="color:var(--orange)">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">Tech Signal</div>
+      <div class="value" id="kpi-signal" style="color:var(--purple)">—</div>
+      <div class="sub"   id="kpi-rsi">—</div>
+    </div>
+    <div class="kpi-card">
+      <div class="label">AI Signal</div>
+      <div class="value" id="kpi-ai" style="color:var(--green)">—</div>
+      <div class="sub"   id="kpi-conf">Train model first</div>
+    </div>
+  </div>
+
+  <!-- TAB NAV -->
+  <div id="tab-nav">
+    <button class="tab-btn active" data-tab="tab-price">📈 Price &amp; Signals</button>
+    <button class="tab-btn"        data-tab="tab-ai">🤖 AI Prediction</button>
+    <button class="tab-btn"        data-tab="tab-heat">🗺️ Nifty Heatmap</button>
+    <button class="tab-btn"        data-tab="tab-news">📰 News &amp; Sentiment</button>
+    <button class="tab-btn"        data-tab="tab-fund">📋 Fundamentals</button>
+    <button class="tab-btn"        data-tab="tab-bt">🔁 Backtest</button>
+  </div>
+
+  <!-- ═══ TAB 1: PRICE & SIGNALS ═══════════════════════════ -->
+  <div class="tab-pane active" id="tab-price">
+    <div class="chart-box">
+      <div id="candle-chart" style="height:480px;"></div>
+    </div>
+    <div class="chart-row chart-row-2">
+      <div class="chart-box"><div id="rsi-chart"  style="height:200px;"></div></div>
+      <div class="chart-box"><div id="macd-chart" style="height:200px;"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 2: AI PREDICTION ═════════════════════════════ -->
+  <div class="tab-pane" id="tab-ai">
+    <div class="chart-row chart-row-7-3">
+      <div class="chart-box">
+        <div id="lstm-chart" style="height:400px;"></div>
+      </div>
+      <div class="side-panel" style="height:400px;">
+        <div class="panel-header">📊 Model Accuracy</div>
+        <div class="panel-body" id="accuracy-body">
+          <p style="color:var(--sub);">Click '🤖 Run ML' to train models.</p>
+        </div>
+      </div>
+    </div>
+    <div class="chart-row chart-row-6-4">
+      <div class="chart-box">
+        <div id="feature-chart" style="height:350px;"></div>
+      </div>
+      <div class="side-panel" style="height:350px;">
+        <div class="panel-header">⚙️ Feature Impact (Top 15)</div>
+        <div class="panel-body" id="feature-body">
+          <p style="color:var(--sub);">Train model to see feature impact.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 3: HEATMAP ════════════════════════════════════ -->
+  <div class="tab-pane" id="tab-heat">
+    <div class="chart-row chart-row-8-4">
+      <div class="chart-box"><div id="heatmap-chart" style="height:500px;"></div></div>
+      <div class="chart-box"><div id="sector-chart"  style="height:500px;"></div></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 4: NEWS & SENTIMENT ══════════════════════════ -->
+  <div class="tab-pane" id="tab-news">
+    <div class="chart-row" style="grid-template-columns:1fr 2fr;">
+      <div>
+        <div class="chart-box"><div id="sent-gauge" style="height:250px;"></div></div>
+        <div class="chart-box"><div id="sent-bar"   style="height:250px;"></div></div>
+      </div>
+      <div id="news-list"></div>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 5: FUNDAMENTALS ══════════════════════════════ -->
+  <div class="tab-pane" id="tab-fund">
+    <div id="fund-body">
+      <p style="color:var(--sub);">Select a stock and click Refresh.</p>
+    </div>
+  </div>
+
+  <!-- ═══ TAB 6: BACKTEST ══════════════════════════════════ -->
+  <div class="tab-pane" id="tab-bt">
+    <div class="chart-row" style="grid-template-columns:2fr 1fr;">
+      <div class="chart-box"><div id="bt-chart" style="height:400px;"></div></div>
+      <div id="bt-stats"></div>
+    </div>
+  </div>
+
+</div><!-- /#main -->
+
+<!-- ── FOOTER ─────────────────────────────────────────────── -->
+<div id="footer">
+  ⚠️ Not financial advice. ML predictions carry risk. Always do your own research.
+</div>
+
+<!-- ── SPINNER OVERLAY ────────────────────────────────────── -->
+<div class="spinner-overlay" id="spinner" style="display:none;">
+  <div class="spinner-box">
+    <div class="spinner"></div>
+    <div class="spinner-title" id="spinner-title">Loading…</div>
+    <p id="spinner-msg">Please wait</p>
+  </div>
+</div>
+
+<!-- ── TOAST ──────────────────────────────────────────────── -->
+<div id="toast"></div>
+
+<!-- ── MAIN SCRIPT ────────────────────────────────────────── -->
+<script src="/static/main.js"></script>
+
+</body>
+</html>

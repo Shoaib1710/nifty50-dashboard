@@ -1,0 +1,16 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "🚀 Run Nifty Dashboard",
+      "type": "python",
+      "request": "launch",
+      "program": "${workspaceFolder}/app.py",
+      "console": "integratedTerminal",
+      "env": {
+        "FLASK_ENV": "development",
+        "TF_CPP_MIN_LOG_LEVEL": "3"
+      }
+    }
+  ]
+}
